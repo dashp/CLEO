@@ -1,0 +1,3 @@
+check process awslogs with pidfile /var/run/awslogs.pid
+  start program = "/etc/init.d/awslogs start"
+  stop program  = "/etc/init.d/awslogs stop

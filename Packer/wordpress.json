@@ -1,0 +1,65 @@
+{
+	
+	"builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "{{user `region`}}",
+	"instance_type" : "{{user `wordpress_instance_type`}}",
+	"source_ami_filter": {
+	    "filters": {
+	      "virtualization-type": "hvm",
+	      "name": "*ubuntu-xenial-16.04-amd64-server-*",
+	      "root-device-type": "ebs"
+	    },
+	    "owners": ["099720109477"],
+	    "most_recent": true
+	  },
+	
+    "ssh_username": "ubuntu",
+    "ami_name": "cleo-wordpress-ami {{timestamp}}",
+	"tags": {
+		"type" : "{{user `ami_tag_type_value`}}"
+	},
+	"launch_block_device_mappings": [
+	    {
+	      "device_name": "/dev/sda1",
+	      "volume_size": 10,
+	      "volume_type": "gp2",
+	      "delete_on_termination": true
+	    },
+	    {
+      	      "device_name": "/dev/sdf",
+      	      "volume_size": 20,
+      	      "volume_type": "gp2",
+      	      "delete_on_termination": false	
+	    }
+	  ]
+  }],
+  	  "provisioners": [
+		  
+		      {
+		        "type": "file",
+		        "source": "../monit",
+		        "destination": "/tmp"
+		     },
+		     {
+		        "type": "file",
+		        "source": "../monit/awslogs",
+		        "destination": "/tmp/awslogs"
+		     },
+			 {
+			 "type": "shell",
+			 "inline": [
+				 "sudo echo {{user `region`}} > /tmp/ami-region"
+			 ]	
+			 },
+			 
+		     {
+  	          "type": "shell",
+			  "remote_path": "/home/ubuntu/script.sh",
+			  "script": "../scripts/provision_base.sh"
+  	         }
+			
+  	      ] 
+}
